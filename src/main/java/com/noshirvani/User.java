@@ -1,6 +1,6 @@
 package com.noshirvani;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -8,7 +8,7 @@ public class User {
     private String name;
     private String userID;
     private String phoneNumber;
-    private LocalDate registrationDate;
+    private LocalDateTime registrationDate;
     private String role;
     private String password;
 
@@ -24,7 +24,7 @@ public class User {
     }
 
 
-    public User(String name, String userID, String phoneNumber, LocalDate registrationDate, String role, String password) {
+    public User(String name, String userID, String phoneNumber, LocalDateTime registrationDate, String role, String password) {
         this(name, userID, phoneNumber, role, password);
         this.registrationDate = registrationDate;
     }
@@ -35,7 +35,7 @@ public class User {
     public User(String name, String userID, String phoneNumber) {
     }
 
-    public User(String name, String userID, String phoneNumber, LocalDate registrationDate, String admin) {
+    public User(String name, String userID, String phoneNumber, LocalDateTime registrationDate, String admin) {
     this.name = name;
     this.userID = userID;
     this.phoneNumber = phoneNumber;
@@ -57,7 +57,9 @@ public class User {
     public String getUserID() {
         return userID;
     }
-
+    public LocalDateTime getRegistrationDate() {
+        return registrationDate;
+    }
     public void setUserID(String userID) {
         this.userID = userID;
     }

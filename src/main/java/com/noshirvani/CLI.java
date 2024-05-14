@@ -1,5 +1,7 @@
 package com.noshirvani;
-
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Scanner;
 import java.time.LocalDate;
 
@@ -26,6 +28,10 @@ public class CLI {
         } else {
             System.out.println("Role: Normal User");
         }
+        LocalDateTime currentTime = user.getRegistrationDate();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formattedDateTime = currentTime.format(formatter);
+        System.out.println("Login Time: " + formattedDateTime);
         printBoxBorder();
     }
     public void start() {
@@ -53,9 +59,9 @@ public class CLI {
                         currentUser = null;
                     } else {
                         if (currentUser.getRole().equalsIgnoreCase("admin")) {
-                            currentUser = new AdminUser(currentUser.getName(), currentUser.getUserID(), currentUser.getPhoneNumber(), LocalDate.now(), password);
+                            currentUser = new AdminUser(currentUser.getName(), currentUser.getUserID(), currentUser.getPhoneNumber(), currentUser.getRegistrationDate(), password);
                         } else {
-                            currentUser = new NormalUser(currentUser.getName(), currentUser.getUserID(), currentUser.getPhoneNumber(), LocalDate.now(), password);
+                            currentUser = new NormalUser(currentUser.getName(), currentUser.getUserID(), currentUser.getPhoneNumber(), LocalDateTime.now(), password);
                         }
                         displayUserInfo(currentUser);
                         System.out.println("Type 'help' to see available commands.");
@@ -80,7 +86,10 @@ public class CLI {
                     addUser(input);
                 } else if (input.equals("get users") && isAdminUser(currentUser)) {
                     displayUsers();
-                } else if (input.startsWith("rent")) {
+                } else if (input.equals("get rentals") && isAdminUser(currentUser)) {
+                    displayRentals();
+                }
+                else if (input.startsWith("rent")) {
                     rentBook(input);
                 } else if (input.startsWith("return")) {
                     returnBook(input);
@@ -93,7 +102,25 @@ public class CLI {
         scanner.close();
     }
 
-
+    private void displayRentals() {
+        System.out.println("Current rentals in the library:");
+        List<Rent> rentals = library.getRentals();
+        if (rentals.isEmpty()) {
+            System.out.println("  - No rentals found.");
+        } else {
+            for (Rent rental : rentals) {
+                Book book = rental.getBook();
+                User user = rental.getUser();
+                LocalDateTime rentalDate = LocalDateTime.parse(rental.getRentalDate());
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                String formattedDate = rentalDate.format(formatter);
+                System.out.println("  - Rental ID: " + rental.getRentalID() +
+                        ", Book Title: " + book.getTitle() +
+                        ", User Name: " + user.getName() +
+                        ", Rental Date: " + formattedDate);
+            }
+        }
+    }
     private void displayHelp() {
         System.out.println("╔══════════════════════════════════════════════════╗");
         System.out.println("║                 Available Commands               ║");
@@ -104,6 +131,7 @@ public class CLI {
             System.out.println("║  - get books                                     ║");
             System.out.println("║  - add user <name> <ID> <phone> <role> <password>║");
             System.out.println("║  - get users                                     ║");
+            System.out.println("║  - get rentals                                   ║");
         }
 
         System.out.println("╠═════════════════ Users Commands ═════════════════╣");
@@ -157,11 +185,10 @@ public class CLI {
         String password = tokens[6];
         User user;
         if (role.equalsIgnoreCase("admin")) {
-            user = new AdminUser(name, userID, phoneNumber, LocalDate.now(), password);
+            user = new AdminUser(name, userID, phoneNumber, LocalDateTime.now(), password);
         } else {
-            user = new NormalUser(name, userID, phoneNumber, LocalDate.now(), password);
+            user = new NormalUser(name, userID, phoneNumber, LocalDateTime.now(), password);
         }
-        System.out.println(user.getName());
         library.addUser(user);
         System.out.println("User added successfully.");
     }
@@ -169,10 +196,14 @@ public class CLI {
 
 
     private void displayUsers() {
+
         System.out.println("Registered users in the library:");
         for (User user : library.getUsers()) {
+            LocalDateTime currentTime = user.getRegistrationDate();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            String formattedDateTime = currentTime.format(formatter);
             System.out.println("User ID: " + user.getUserID() + ", Name: " + user.getName() +
-                    ", Phone Number: " + user.getPhoneNumber());
+                    ", Phone Number: " + user.getPhoneNumber() + ", Regiseration Date: " + formattedDateTime);
         }
     }
 

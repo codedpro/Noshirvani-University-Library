@@ -7,7 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,7 +48,9 @@ public class Library {
     public List<Book> getBooks() {
         return bookRepository;
     }
-
+    public List<Rent> getRentals() {
+        return rentalRegistry;
+    }
     public List<Book> getAvailableBooks() {
         List<Book> availableBooks = new ArrayList<>();
         for (Book book : bookRepository) {
@@ -72,7 +74,7 @@ public class Library {
 
     public void rentBook(Book book, User user) {
         if (book.isAvailable()) {
-            String rentalDate = LocalDate.now().toString();
+            String rentalDate = LocalDateTime.now().toString();
             Rent rent = new Rent(book, user, rentalDate);
             rentalRegistry.add(rent);
             book.setAvailability(false);
@@ -86,6 +88,7 @@ public class Library {
 
 
     public void returnBook(Book book) {
+
         for (Rent rent : rentalRegistry) {
             if (rent.getBook().equals(book)) {
                 rentalRegistry.remove(rent);
@@ -100,6 +103,8 @@ public class Library {
     }
     private void saveBooks() {
         ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+
         try {
             mapper.writeValue(new File(BOOKS_FILE), bookRepository);
         } catch (IOException e) {
@@ -109,6 +114,8 @@ public class Library {
 
     private void saveUsers() {
         ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+
         try {
             mapper.writeValue(new File(USERS_FILE), userRegistry);
         } catch (IOException e) {
@@ -118,6 +125,8 @@ public class Library {
 
     private void saveRentals() {
         ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+
         try {
             mapper.writeValue(new File(RENTALS_FILE), rentalRegistry);
         } catch (IOException e) {
@@ -126,6 +135,8 @@ public class Library {
     }
     private void loadBooks() {
         ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+
         try {
             File file = new File(BOOKS_FILE);
             if (!file.exists() || file.length() == 0) {
@@ -141,10 +152,11 @@ public class Library {
     }
     private void loadUsers() {
         ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
         try {
             File file = new File(USERS_FILE);
             if (!file.exists() || file.length() == 0) {
-                userRegistry.add(new AdminUser("Admin", "Admin_1", "1234567890", LocalDate.now(), "1234"));
+                userRegistry.add(new AdminUser("Admin", "Admin_1", "1234567890", LocalDateTime.now(), "1234"));
                 saveUsers();
             } else {
                 List<User> loadedUsers = mapper.readValue(file, new TypeReference<List<User>>() {});
@@ -171,6 +183,7 @@ public class Library {
 
     private void loadRentals() {
         ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
 
         try {
             File file = new File(RENTALS_FILE);
